@@ -38,7 +38,7 @@ namespace Orchard.Tests.Data
                 {
                     Provider = "SqlServer",
                     DataFolder = temporaryPath,
-                    ConnectionString = "Data Source=.\\SQLEXPRESS;AttachDbFileName=" + databasePath + ";Integrated Security=True;User Instance=True;",
+                    ConnectionString = "Data Source=" + (Environment.GetEnvironmentVariable("DB_HOST") ?? ".\\SQLEXPRESS") + ";AttachDbFileName=" + databasePath + ";Integrated Security=True;User Instance=True;",
                     RecordDescriptors = recordDescriptors,
                 };
 
@@ -91,7 +91,7 @@ namespace Orchard.Tests.Data
         {
             try
             {
-                var connection = new SqlConnection("Data Source=.\\SQLEXPRESS;Initial Catalog=tempdb;Integrated Security=true;User Instance=True;");
+                var connection = new SqlConnection("Data Source=" + (Environment.GetEnvironmentVariable("DB_HOST") ?? ".\\SQLEXPRESS") + ";Initial Catalog=tempdb;Integrated Security=true;User Instance=True;");
                 connection.Open();
                 return connection;
             }

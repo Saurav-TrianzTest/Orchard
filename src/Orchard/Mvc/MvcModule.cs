@@ -1,4 +1,5 @@
 using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -49,7 +50,7 @@ namespace Orchard.Mvc
                 var s = siteService.GetSiteSettings().BaseUrl;
 
                 // When Setup is running from the command line, no BaseUrl exists yet.
-                return string.IsNullOrEmpty(s) ? "http://localhost" : s;
+                return string.IsNullOrEmpty(s) ? (System.Environment.GetEnvironmentVariable("ORCHARD_BASE_URL") ?? "http://localhost") : s;
             });
 
             return new HttpContextPlaceholder(baseUrl);

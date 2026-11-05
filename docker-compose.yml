@@ -1,0 +1,22 @@
+version: '3.4'
+
+services:
+  orchard:
+    image: orchard
+    ports:
+      - "80:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ORCHARD_BASE_URL=${ORCHARD_BASE_URL:-http://localhost}
+      - DB_HOST=${DB_HOST:-localhost}
+      - MACHINEKEY_VALIDATION=${MACHINEKEY_VALIDATION:-AutoGenerate,IsolateApps}
+      - MACHINEKEY_DECRYPTION=${MACHINEKEY_DECRYPTION:-AutoGenerate,IsolateApps}
+    volumes:
+      - orchard-appdata:/inetpub/wwwroot/App_Data
+      - orchard-modules:/inetpub/wwwroot/Modules
+      - orchard-themes:/inetpub/wwwroot/Themes
+
+volumes:
+  orchard-appdata:
+  orchard-modules:
+  orchard-themes:
