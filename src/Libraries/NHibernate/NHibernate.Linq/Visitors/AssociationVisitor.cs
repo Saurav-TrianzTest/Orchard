@@ -86,9 +86,9 @@ namespace NHibernate.Linq.Visitors
 			return expr.Member.Name;
 		}
 
-		protected override Expression VisitMemberAccess(MemberExpression expr)
+		protected override Expression VisitMember(System.Linq.Expressions.MemberExpression expr)
 		{
-			expr = (MemberExpression)base.VisitMemberAccess(expr);
+			expr = (MemberExpression)base.VisitMember(expr);
 
 			IClassMetadata metaData = GetMetaData(expr.Type);
 			if (metaData != null)

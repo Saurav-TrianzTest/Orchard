@@ -181,6 +181,11 @@ namespace NHibernate.Linq.Visitors
 			return m;
 		}
 
+		protected virtual Expression VisitMember(MemberExpression m)
+		{
+			return VisitMemberAccess(m);
+		}
+
 		protected virtual Expression VisitMethodCall(MethodCallExpression m)
 		{
 			Expression obj = Visit(m.Object);

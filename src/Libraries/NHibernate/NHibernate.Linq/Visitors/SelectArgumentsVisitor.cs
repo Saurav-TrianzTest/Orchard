@@ -339,7 +339,7 @@ namespace NHibernate.Linq.Visitors
 			return expr;
 		}
 
-		protected override Expression VisitMemberAccess(MemberExpression expr)
+		protected override Expression VisitMember(System.Linq.Expressions.MemberExpression expr)
 		{
 			//this must be a grouping parameter member access
 			IProjection projection = _rootCriteria.GetProjection();

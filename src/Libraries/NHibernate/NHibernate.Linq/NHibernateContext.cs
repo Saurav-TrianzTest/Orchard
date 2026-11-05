@@ -6,13 +6,48 @@ using System.Linq;
 using System.Reflection;
 using NHibernate.Metadata;
 
+// .NET Framework types that were in System.Data.Services are not available on .NET 8.
+// These interfaces and exception are stubbed locally so the file still compiles.
+namespace System.Data.Services
+{
+    public interface IUpdatable
+    {
+        void AddReferenceToCollection(object targetResource, string propertyName, object resourceToBeAdded);
+        void ClearChanges();
+        object CreateResource(string containerName, string fullTypeName);
+        void DeleteResource(object targetResource);
+        object GetResource(IQueryable query, string fullTypeName);
+        object GetValue(object targetResource, string propertyName);
+        void RemoveReferenceFromCollection(object targetResource, string propertyName, object resourceToBeRemoved);
+        object ResetResource(object resource);
+        object ResolveResource(object resource);
+        void SaveChanges();
+        void SetReference(object targetResource, string propertyName, object propertyValue);
+        void SetValue(object targetResource, string propertyName, object propertyValue);
+    }
+
+    public interface IExpandProvider
+    {
+        IEnumerable ApplyExpansions(IQueryable queryable, ICollection<ExpandSegmentCollection> expandPaths);
+    }
+
+    public class DataServiceException : Exception
+    {
+        public DataServiceException(string message) : base(message) { }
+        public DataServiceException(string message, Exception inner) : base(message, inner) { }
+    }
+
+    public class ExpandSegmentCollection : System.Collections.ObjectModel.Collection<ExpandSegment> { }
+    public class ExpandSegment { public string Name { get; set; } public bool HasFilter { get; set; } }
+}
+
 namespace NHibernate.Linq
 {
 	/// <summary>
 	/// Wraps an <see cref="T:NHibernate.ISession"/> object to provide base functionality
 	/// for custom, database-specific context classes.
 	/// </summary>
-	public abstract class NHibernateContext : IDisposable, ICloneable, IUpdatable, IExpandProvider
+	public abstract class NHibernateContext : IDisposable, ICloneable, global::System.Data.Services.IUpdatable, global::System.Data.Services.IExpandProvider
 	{
 		/// <summary>
 		/// Provides access to database provider specific methods.
@@ -125,7 +160,7 @@ namespace NHibernate.Linq
 		/// <param name="targetResource">The target resource.</param>
 		/// <param name="propertyName">Name of the property.</param>
 		/// <param name="resourceToBeAdded">The resource to be added.</param>
-		void IUpdatable.AddReferenceToCollection(object targetResource, string propertyName, object resourceToBeAdded)
+		void global::System.Data.Services.IUpdatable.AddReferenceToCollection(object targetResource, string propertyName, object resourceToBeAdded)
 		{
 			IClassMetadata metadata = session.SessionFactory.GetClassMetadata(targetResource.GetType().FullName);
 			if (metadata == null)
@@ -155,7 +190,7 @@ namespace NHibernate.Linq
 		/// <summary>
 		/// Clears the changes.
 		/// </summary>
-		void IUpdatable.ClearChanges()
+		void global::System.Data.Services.IUpdatable.ClearChanges()
 		{
 			UpdateCache.Clear();
 			session.Clear();
@@ -167,7 +202,7 @@ namespace NHibernate.Linq
 		/// <param name="containerName">Name of the container.</param>
 		/// <param name="fullTypeName">Full name of the type.</param>
 		/// <returns>Newly created Resource</returns>
-		object IUpdatable.CreateResource(string containerName, string fullTypeName)
+		object global::System.Data.Services.IUpdatable.CreateResource(string containerName, string fullTypeName)
 		{
 			// Get the metadata
 			IClassMetadata metadata = session.SessionFactory.GetClassMetadata(fullTypeName);
@@ -186,7 +221,7 @@ namespace NHibernate.Linq
 		/// Deletes the resource.
 		/// </summary>
 		/// <param name="targetResource">The target resource.</param>
-		void IUpdatable.DeleteResource(object targetResource)
+		void global::System.Data.Services.IUpdatable.DeleteResource(object targetResource)
 		{
 			// Push it to the Session to support deletion
 			if (UpdateCache.Contains(targetResource))
@@ -205,7 +240,7 @@ namespace NHibernate.Linq
 		/// <param name="query">The query.</param>
 		/// <param name="fullTypeName">Full name of the type.</param>
 		/// <returns></returns>
-		object IUpdatable.GetResource(System.Linq.IQueryable query, string fullTypeName)
+		object global::System.Data.Services.IUpdatable.GetResource(System.Linq.IQueryable query, string fullTypeName)
 		{
 			// Get the first result
 			IEnumerable results = (IEnumerable)query;
@@ -235,7 +270,7 @@ namespace NHibernate.Linq
 		/// <param name="targetResource">The target resource.</param>
 		/// <param name="propertyName">Name of the property.</param>
 		/// <returns></returns>
-		object IUpdatable.GetValue(object targetResource, string propertyName)
+		object global::System.Data.Services.IUpdatable.GetValue(object targetResource, string propertyName)
 		{
 			IClassMetadata metadata = session.SessionFactory.GetClassMetadata(targetResource.GetType().FullName);
 			if (metadata == null)
@@ -260,7 +295,7 @@ namespace NHibernate.Linq
 		/// <param name="targetResource">The target resource.</param>
 		/// <param name="propertyName">Name of the property.</param>
 		/// <param name="resourceToBeRemoved">The resource to be removed.</param>
-		void IUpdatable.RemoveReferenceFromCollection(object targetResource, string propertyName, object resourceToBeRemoved)
+		void global::System.Data.Services.IUpdatable.RemoveReferenceFromCollection(object targetResource, string propertyName, object resourceToBeRemoved)
 		{
 			IClassMetadata metadata = session.SessionFactory.GetClassMetadata(targetResource.GetType().FullName);
 			if (metadata == null)
@@ -292,9 +327,9 @@ namespace NHibernate.Linq
 		/// </summary>
 		/// <param name="resource">The resource to reset.</param>
 		/// <returns></returns>
-		object IUpdatable.ResetResource(object resource)
+		object global::System.Data.Services.IUpdatable.ResetResource(object resource)
 		{
-			IUpdatable update = this;
+			var update = (global::System.Data.Services.IUpdatable)this;
 
 			// Create a new resource of the same type
 			// but only make a local copy as we're only using it to set the default fields
@@ -318,7 +353,7 @@ namespace NHibernate.Linq
 		/// </summary>
 		/// <param name="resource">The resource.</param>
 		/// <returns></returns>
-		object IUpdatable.ResolveResource(object resource)
+		object global::System.Data.Services.IUpdatable.ResolveResource(object resource)
 		{
 			// Resolve Resource always just returns the resource
 			// since we not using tokens or cookies to the actual objects
@@ -329,7 +364,7 @@ namespace NHibernate.Linq
 		/// <summary>
 		/// Saves the changes.
 		/// </summary>
-		void IUpdatable.SaveChanges()
+		void global::System.Data.Services.IUpdatable.SaveChanges()
 		{
 			// All saves must be all or nothing.
 			using (ITransaction tx = Session.BeginTransaction())
@@ -367,9 +402,9 @@ namespace NHibernate.Linq
 		/// <param name="targetResource">The target resource.</param>
 		/// <param name="propertyName">Name of the property.</param>
 		/// <param name="propertyValue">The property value.</param>
-		void IUpdatable.SetReference(object targetResource, string propertyName, object propertyValue)
+		void global::System.Data.Services.IUpdatable.SetReference(object targetResource, string propertyName, object propertyValue)
 		{
-			((IUpdatable)this).SetValue(targetResource, propertyName, propertyValue);
+			((global::System.Data.Services.IUpdatable)this).SetValue(targetResource, propertyName, propertyValue);
 		}
 
 		/// <summary>
@@ -378,7 +413,7 @@ namespace NHibernate.Linq
 		/// <param name="targetResource">The target resource.</param>
 		/// <param name="propertyName">Name of the property.</param>
 		/// <param name="propertyValue">The property value.</param>
-		void IUpdatable.SetValue(object targetResource, string propertyName, object propertyValue)
+		void global::System.Data.Services.IUpdatable.SetValue(object targetResource, string propertyName, object propertyValue)
 		{
 			IClassMetadata metadata = session.SessionFactory.GetClassMetadata(targetResource.GetType().FullName);
 			if (metadata == null)
@@ -401,7 +436,7 @@ namespace NHibernate.Linq
 
 		#region IExpandProvider Members
 
-		IEnumerable IExpandProvider.ApplyExpansions(IQueryable queryable, ICollection<ExpandSegmentCollection> expandPaths)
+		IEnumerable global::System.Data.Services.IExpandProvider.ApplyExpansions(IQueryable queryable, ICollection<System.Data.Services.ExpandSegmentCollection> expandPaths)
 		{
 			if (queryable == null) throw new DataServiceException("Query cannot be null");
 
@@ -409,9 +444,9 @@ namespace NHibernate.Linq
 			if (nHibQuery == null) throw new DataServiceException("Expansion only supported on INHibernateQueryable queries");
 
 			if (expandPaths.Count == 0) throw new DataServiceException("Expansion Paths cannot be null");
-			foreach (ExpandSegmentCollection coll in expandPaths)
+			foreach (System.Data.Services.ExpandSegmentCollection coll in expandPaths)
 			{
-				foreach (ExpandSegment seg in coll)
+				foreach (System.Data.Services.ExpandSegment seg in coll)
 				{
 					if (seg.HasFilter)
 					{

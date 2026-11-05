@@ -32,7 +32,7 @@ namespace NHibernate.Linq.Visitors
 			return Expression.Call(method, expr);
 		}
 
-		protected override Expression VisitMemberAccess(MemberExpression m)
+		protected override Expression VisitMember(System.Linq.Expressions.MemberExpression m)
 		{
 			CollectionAccessExpression parent = m.Expression as CollectionAccessExpression;
 			if (parent != null && m.Member.Name == "Count")
@@ -40,7 +40,7 @@ namespace NHibernate.Linq.Visitors
 				MethodInfo method = GetCountMethod(parent.ElementExpression.Type);
 				return Expression.Call(method, CastIfNecessary(parent));
 			}
-			return base.VisitMemberAccess(m);
+			return base.VisitMember(m);
 		}
 	}
 }
